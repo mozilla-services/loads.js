@@ -1,53 +1,83 @@
 var zmq = require('zmq');
-var JSON = require('JSON');
 var Base = require('./base')
   
 exports = module.exports = Loads;
 
-/**
-* Initialize a new "loads" test reporter.
-*
-* @param {Runner} runner
-* @api public
-*/
-
-function Loads(runner, options) {
+function Loads(runner) {
   Base.call(this, runner);
 
-  var address = options.zmq_address || 'tcp://127.0.0.1:5558';
+  var disableZmq = process.env.DISABLE_ZMQ || false;
+
+  var address = process.env.LOADS_ZMQ_RECEIVER || 'ipc:///tmp/loads-receiver.ipc';
+  var workerid = process.env.LOADS_WORKER_ID || 'ohyeah';
+  var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
+  loadsStatus = loadsStatus.split(',');
+  console.log('loads status: ' + loadsStatus);
 
   var self = this
-    , stats = this.stats
     , total = runner.total
-    , socket = zmq.socket('push').bind(address);
+    , socket = undefined;
 
+  function send(type, data){
+    to_send = {
+      data_type: type,
+      worker_id: workerid
+    };
+
+    if (!(type == 'startTestRun' || type == 'stopTestRun'))
+      to_send['loads_status'] = loadsStatus
+
+    if (data != undefined) {
+      for (var i in data){
+        console.log(i, data[i]);
+        to_send[i] = data[i];
+      }
+    }
+
+    console.log(to_send);
+
+    if (!disableZmq){
+      socket.send(JSON.stringify(to_send));
+    }
+  }
+
+  if (!disableZmq){
+    console.log('connecting to the socket at ' + address);
+    var socket = zmq.socket('push')
+    socket.setsockopt('hwm', 80960);
+    socket.setsockopt('linger', 1);
+    socket.connect(address);
+  }
+
+  // test suite started
   runner.on('start', function(){
-    socket.send(JSON.stringify(['startTest', { test: test,
-                                               total: total }]));
+    send('startTestRun');
+  });
+
+  // test suite finished
+  runner.on('end', function(){
+    send('stopTestRun');
+    if (!disableZmq)
+      socket.close();
+  });
+
+  runner.on('test', function(test){
+    send('startTest', {test: escape(test.title)});
+  });
+
+  runner.on('test end', function(test){
+    send('stopTest', {test: escape(test.title)});
   });
 
   runner.on('pass', function(test){
-    socket.send(JSON.stringify(['addSuccess', { test: test }]));
+    send('addSuccess', {test: escape(test.title)});
   });
 
   runner.on('fail', function(test, err){
-    socket.send(JSON.stringify(['addFailure', { test: test,
-                                                error: err }]));
+    send('addFailure', {test: escape(test.title), error: err});
   });
 
-  runner.on('end', function(){
-    socket.send(JSON.stringify(['endTest', { test: test }]));
-  });
 }
-
-/**
-* Return a plain-object representation of `test`
-* free of cyclic properties etc.
-*
-* @param {Object} test
-* @return {Object}
-* @api private
-*/
 
 function clean(test) {
   return {
