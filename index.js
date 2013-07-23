@@ -8,11 +8,10 @@ function Loads(runner) {
 
   var disableZmq = process.env.DISABLE_ZMQ || false;
 
-  var address = process.env.LOADS_ZMQ_RECEIVER || 'ipc:///tmp/loads-receiver.ipc';
+  var address = process.env.LOADS_ZMQ_RECEIVER || 'ipc:///tmp/loads-agent-receiver.ipc';
   var workerid = process.env.LOADS_WORKER_ID || 'ohyeah';
   var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
   loadsStatus = loadsStatus.split(',');
-  console.log('loads status: ' + loadsStatus);
 
   var self = this
     , total = runner.total
@@ -29,7 +28,6 @@ function Loads(runner) {
 
     if (data != undefined) {
       for (var i in data){
-        console.log(i, data[i]);
         to_send[i] = data[i];
       }
     }
@@ -42,7 +40,6 @@ function Loads(runner) {
   }
 
   if (!disableZmq){
-    console.log('connecting to the socket at ' + address);
     var socket = zmq.socket('push')
     socket.setsockopt('hwm', 80960);
     socket.setsockopt('linger', 1);
