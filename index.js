@@ -1,5 +1,5 @@
 var zmq = require('zmq');
-var Base = require('./base')
+var Base = require('mocha/lib/reporters/base')
   
 exports = module.exports = Loads;
 
