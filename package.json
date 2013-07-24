@@ -1,0 +1,18 @@
+{
+  "name": "mocha-loads-reporter",
+  "version": "0.0.1",
+  "description": "A reporter to send the results to the loads runner",
+  "main": "index.js",
+  "directories": {
+  },
+  "scripts": {
+  },
+  "repository": "http://github.com/mozilla-services/loads.js",
+  "license": "MPL 2.0",
+  "dependencies": {
+    "zmq": "2.4.x"
+  },
+  "devDependencies": {
+    "mocha": "1.9.x"
+  }
+}
