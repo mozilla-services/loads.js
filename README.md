@@ -20,6 +20,6 @@ the loads reporter, and you should be all set.
 Of course, this is meant to be run by loads itself, which setups some
 useful environment variables:
 
-  LOADS_ZMQ_RECEIVER (defaults to 'ipc:///tmp/loads-agent-receiver.ipc')
-  LOADS_WORKER_ID (defaults to 'ohyeah')
-  LOADS_STATUS (defaults to '1,1,1,1')
+* `LOADS_ZMQ_RECEIVER` (defaults to 'ipc:///tmp/loads-agent-receiver.ipc')
+* `LOADS_WORKER_ID` (defaults to 'ohyeah')
+* `LOADS_STATUS` (defaults to '1,1,1,1')
