@@ -4,36 +4,22 @@ A set of tools to run loads loadtests directly from javascript.
 
 ## Installation
 
-
-If you're using [component](https://github.com/component/component)
-add mocha-loads-reporter as a dev dependency:
+You can install loads.js with npm. Go in your project and run
 
 ```
-$ component install --dev mozilla-services/loads.js
-```
-
-  Then tell mocha to use the reporter:
-
-```js
-mocha.setup({ ui: 'bdd', reporter: require('mocha-loads-reporter') })
-```
-
-  If you're not using component add the `./build` files to
-  your page and tell mocha to use the reporter:
-
-```js
-mocha.setup({ ui: 'bdd', reporter: Loads  })
+$ npm install ../../services/loads.js
 ```
 
 ## Usage
 
-Currently, it's only possible to run mocha tests, using the "loads" reporter.
-You need to use the `--reporter loads` syntax with it, as shown here:
+Then you can use the `--reporter mocha-loads-reporter` option to be sure to use
+the loads reporter, and you should be all set.
 
-    $ mocha test/integration/hello.js --reporter loads --globals zmq_endpoint=tcp://127.0.0.1:5558
+    $ mocha test/integration/hello.js --reporter mocha-loads-reporter
 
+Of course, this is meant to be run by loads itself, which setups some
+useful environment variables:
 
-## TODO
-
-- Create a specialised runner which registers the reporter automatically
-
+  LOADS_ZMQ_RECEIVER (defaults to 'ipc:///tmp/loads-agent-receiver.ipc')
+  LOADS_WORKER_ID (defaults to 'ohyeah')
+  LOADS_STATUS (defaults to '1,1,1,1')
