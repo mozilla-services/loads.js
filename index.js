@@ -1,14 +1,20 @@
 var zmq = require('zmq');
-var Base = require('mocha/lib/reporters/base')
-  
+var Base = require('./base');
+
 exports = module.exports = Loads;
 
 function Loads(runner) {
   Base.call(this, runner);
 
   var disableZmq = process.env.DISABLE_ZMQ || false;
+  var pid = process.pid;
+  console.log('This process is ' + pid);
 
-  var address = process.env.LOADS_ZMQ_RECEIVER || 'ipc:///tmp/loads-agent-receiver.ipc';
+  if (!disableZmq){
+    var address = process.env.LOADS_ZMQ_RECEIVER;
+    console.log('Sending the events to ' + address)
+  }
+
   var workerid = process.env.LOADS_WORKER_ID || 'ohyeah';
   var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
   loadsStatus = loadsStatus.split(',');
@@ -20,7 +26,8 @@ function Loads(runner) {
   function send(type, data){
     to_send = {
       data_type: type,
-      worker_id: workerid
+      worker_id: workerid,
+      pid: pid
     };
 
     if (!(type == 'startTestRun' || type == 'stopTestRun'))
@@ -32,17 +39,20 @@ function Loads(runner) {
       }
     }
 
+    to_send = JSON.stringify(to_send);
     console.log(to_send);
 
     if (!disableZmq){
-      socket.send(JSON.stringify(to_send));
+      msg = new Buffer(String(to_send), 'utf8')
+      socket.send(msg);
     }
   }
 
   if (!disableZmq){
-    var socket = zmq.socket('push')
-    socket.setsockopt('hwm', 80960);
-    socket.setsockopt('linger', 1);
+
+    // This uses the low-level bindings of the zeromq.node library.
+    var context = new zmq.Context();
+    var socket = new zmq.Socket(context, zmq.ZMQ_PUSH);
     socket.connect(address);
   }
 
@@ -53,9 +63,14 @@ function Loads(runner) {
 
   // test suite finished
   runner.on('end', function(){
+    // Wait a bit before closing the socket.
     send('stopTestRun');
-    if (!disableZmq)
+
+    if (!disableZmq){
+      // socket._flush();
       socket.close();
+      context.close();
+    }
   });
 
   runner.on('test', function(test){
@@ -74,12 +89,4 @@ function Loads(runner) {
     send('addFailure', {test: escape(test.title), error: err});
   });
 
-}
-
-function clean(test) {
-  return {
-      title: test.title
-    , fullTitle: test.fullTitle()
-    , duration: test.duration
-  }
 }
