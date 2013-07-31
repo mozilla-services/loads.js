@@ -7,8 +7,6 @@ function Loads(runner) {
   Base.call(this, runner);
 
   var disableZmq = process.env.DISABLE_ZMQ || false;
-  var pid = process.pid;
-  console.log('This process is ' + pid);
 
   if (!disableZmq){
     var address = process.env.LOADS_ZMQ_RECEIVER;
@@ -26,8 +24,7 @@ function Loads(runner) {
   function send(type, data){
     to_send = {
       data_type: type,
-      worker_id: workerid,
-      pid: pid
+      worker_id: workerid
     };
 
     if (!(type == 'startTestRun' || type == 'stopTestRun'))
