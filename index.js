@@ -13,7 +13,7 @@ function Loads(runner) {
     console.log('Sending the events to ' + address)
   }
 
-  var workerid = process.env.LOADS_WORKER_ID || 'ohyeah';
+  var agentid = process.env.LOADS_AGENT_ID || 'ohyeah';
   var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
   loadsStatus = loadsStatus.split(',');
 
@@ -24,7 +24,7 @@ function Loads(runner) {
   function send(type, data){
     to_send = {
       data_type: type,
-      worker_id: workerid
+      agent_id: agentid
     };
 
     if (!(type == 'startTestRun' || type == 'stopTestRun'))
