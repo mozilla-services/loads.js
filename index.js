@@ -21,10 +21,13 @@ function Loads(runner) {
     , total = runner.total
     , socket = undefined;
 
+  var pid = process.pid;
+
   function send(type, data){
     to_send = {
       data_type: type,
-      agent_id: agentid
+      agent_id: agentid,
+      pid: pid
     };
 
     if (!(type == 'startTestRun' || type == 'stopTestRun'))
