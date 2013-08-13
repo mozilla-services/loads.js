@@ -13,22 +13,22 @@ function Loads(runner) {
     console.log('Sending the events to ' + address)
   }
 
-  var agentid = process.env.LOADS_AGENT_ID || 'ohyeah';
+  var agentId = process.env.LOADS_AGENT_ID || 'ohyeah';
   var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
+  var runId = process.env.LOADS_RUN_ID;
   loadsStatus = loadsStatus.split(',');
 
   var self = this
     , total = runner.total
     , socket = undefined;
 
-  var pid = process.pid;
-
   function send(type, data){
     to_send = {
       data_type: type,
-      agent_id: agentid,
-      pid: pid
+      agent_id: agentId,
+      run_id: runId
     };
+
 
     if (!(type == 'startTestRun' || type == 'stopTestRun'))
       to_send['loads_status'] = loadsStatus
@@ -56,16 +56,8 @@ function Loads(runner) {
     socket.connect(address);
   }
 
-  // test suite started
-  runner.on('start', function(){
-    send('startTestRun');
-  });
-
   // test suite finished
   runner.on('end', function(){
-    // Wait a bit before closing the socket.
-    send('stopTestRun');
-
     if (!disableZmq){
       // socket._flush();
       socket.close();
