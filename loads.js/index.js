@@ -4,15 +4,31 @@ var zmq = require('zmq');
 
 exports = module.exports = LoadsSocket;
 
+// Default configuration for a LoadsSocket is taken from the environment.
+//
+var defaults = exports.defaults = {
+  ZMQ_RECEIVER: 'ipc:///tmp/loads-agent-receiver.ipc',
+  AGENT_ID: '0',
+  RUN_ID: '0',
+  STATUS: '1,1,1,1'
+};
+for (var k in defaults) {
+  if (defaults.hasOwnProperty(k)) {
+    if (process.env.hasOwnProperty("LOADS_" + k)) {
+      defaults[k] = process.env["LOADS_" + k];
+    }
+  }
+}
 
-function LoadsSocket(receiver, agentId, runId, loadsStatus) {
-    this.receiver = receiver;
-    this.agentId = agentId;
-    this.runId = runId;
 
-    loadsStatus = loadsStatus || '1,1,1,1';
-    this.loadsStatus = loadsStatus.split(',');
-
+// An object for sending messages back to loads.
+//
+function LoadsSocket(options) {
+    if (!options) { options = {}; }
+    this.receiver = options.ZMQ_RECEIVER || defaults.ZMQ_RECEIVER;
+    this.agentId = options.AGENT_ID || defaults.AGENT_ID;
+    this.runId = options.RUN_ID || defaults.RUN_ID;
+    this.loadsStatus = (options.STATUS || defaults.STATUS).split(',');
     this.initializeSocket();
 }
 
