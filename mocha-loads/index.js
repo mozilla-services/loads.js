@@ -12,11 +12,7 @@ function Loads(runner) {
                 + 'to use the loads reporter.');
     return;
   }
-  var agentId = process.env.LOADS_AGENT_ID || 'ohyeah';
-  var loadsStatus = process.env.LOADS_STATUS || '1,1,1,1';
-  var runId = process.env.LOADS_RUN_ID;
-
-  var socket = new LoadsSocket(address, agentId, runId, loadsStatus);
+  var socket = new LoadsSocket();
 
   runner.on('test', function(test){
     socket.send('startTest', {test: escape(test.title)});
