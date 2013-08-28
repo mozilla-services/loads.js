@@ -39,7 +39,7 @@ LoadsSocket.prototype.send = function(type, data, forceSend){
       data_type: type,
       agent_id: this.agentId,
       run_id: this.runId,
-      loads_status: this.status
+      loads_status: this.loadsStatus
     };
 
     if (data !== undefined) {
@@ -78,7 +78,7 @@ function getOptionsFromEnviron(env) {
     options.runId = env.LOADS_RUN_ID;
   }
   if (env.hasOwnProperty("LOADS_STATUS")) {
-    options.status = env.LOADS_STATUS;
+    options.loadsStatus = env.LOADS_STATUS;
   }
   return options;
 }
