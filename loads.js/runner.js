@@ -60,7 +60,7 @@ function run(tests, socket, cb) {
 // When executed as a script, run tests on module given in command-line args.
 // This makes it possible to run this directly as a loads external runner.
 if (require.main === module) {
-  process.title = 'loads.runner';
+  process.title = 'loadsjs.runner';
   var options = loads.getOptionsFromEnviron();
   var socket = new loads.LoadsSocket(options);
   run(process.argv[2], socket, function(err) {
