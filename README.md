@@ -1,9 +1,16 @@
 # Loads.js
 
-This repository contains tools that can be used to help you make your tests run
-with loads.
+A library for writing JavaScript loadtests that can integrate with the
+[loads](http://loads.rtfd.org) framework.
 
-- [Loads.js](https://github.com/mozilla-services/loads.js/loads.js) is
-  a library that you can use to communicate with loads
-- [mocha-loads](https://github.com/mozilla-services/loads.js/mocha-loads) is an
-  integration of loads with mocha.
+## Installation
+
+Loads.js is packaged for npm; just do:
+
+```
+$ npm install /path/to/loads.js
+```
+
+## Usage
+
+XXX TODO WRITE ME

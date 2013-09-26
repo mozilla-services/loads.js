@@ -1,0 +1,17 @@
+{
+  "name": "loadsjs",
+  "version": "0.0.1",
+  "description": "A loadtest runner and reporter to integrate with loads",
+  "main": "./loadsjs/index.js",
+  "bin": {
+    "loadsjs-runner": "./loadsjs/runner.js"
+  },
+  "repository": "http://github.com/mozilla-services/loads.js",
+  "license": "MPL 2.0",
+  "dependencies": {
+    "zmq": "2.4.x"
+  },
+  "devDependencies": {
+    "jshint": "0.9.1"
+  }
+}
