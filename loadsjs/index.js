@@ -47,8 +47,8 @@ LoadsSocket.prototype.initializeSocket = function(){
 // Send a message to the loads broker.
 //
 LoadsSocket.prototype.send = function(type, data){
-    var loadsStatus = [this.runStatus.totalHits, this.runStatus.currentHit,
-                       this.runStatus.totalUsers, this.runStatus.currentUser];
+    var loadsStatus = [this.runStatus.totalHits, this.runStatus.totalUsers,
+                       this.runStatus.currentHit, this.runStatus.currentUser];
     var to_send = {
       data_type: type,
       agent_id: this.agentId,
