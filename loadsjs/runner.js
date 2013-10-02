@@ -73,7 +73,11 @@ function run(tests, socket, cb) {
       };
       socket.send('startTest', {test: testname});
       testcb.socket = socket;
-      test(testcb);
+      try {
+        test(testcb);
+      } catch (err) {
+        testcb(err);
+      }
     }
 
     function doRemainingTests(cb) {
