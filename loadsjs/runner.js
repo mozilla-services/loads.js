@@ -99,7 +99,6 @@ function run(tests, socket, cb) {
       if (err) return cb(err);
       var keepGoing = false;
       if (socket.runStatus.currentHit < socket.runStatus.totalHits) {
-        socket.runStatus.currentHit++;
         keepGoing = true;
       }
       if (duration) {
@@ -108,6 +107,7 @@ function run(tests, socket, cb) {
         }
       }
       if (keepGoing) {
+        socket.runStatus.currentHit++;
         doTestRunsUntilFinished(cb);
       } else {
         return cb(null);
