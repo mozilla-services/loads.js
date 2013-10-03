@@ -12,6 +12,7 @@
 'use strict';
 
 var zmq = require('zmq');
+var async = require('async');
 var loads = require('./index.js');
 
 exports = module.exports = run;
@@ -26,70 +27,25 @@ function run(tests, socket, cb) {
   // If given a string, import it as a module.
   // If given a non-function object, run any test-like methods on it.
 
-  var testsToRun = [];
   var testNames = [];
+  var testsToRun = {}
 
   if (typeof tests === 'string') {
     tests = require(tests);
   }
   if (typeof tests === 'function') {
-    testsToRun.push(tests);
     testNames.push(tests.name || "test_default");
+    testsToRun[testNames[testNames.length - 1]] = tests;
   } else if (typeof tests === 'object') {
     Object.keys(tests).forEach(function(testname) {
       if (typeof tests[testname] === 'function') {
         // Match array indices, or method names with "test" in them.
         if (typeof testname === 'number' || (/.*test.*/i).exec(testname)) {
-          testsToRun.push(tests[testname].bind(tests));
           testNames.push(testname);
+          testsToRun[testname] = tests[testname].bind(tests);
         }
       }
     });
-  }
-
-  // Function to execute a single run through the tests.
-  // This will be called repeatedly to satisfy the required hits/duration.
-
-  function doTestRun(cb) {
-
-    var curTest = 0;
- 
-    function doNextTest(cb) {
-      var test = testsToRun[curTest];
-      var testname = testNames[curTest];
-      // The test will be called with a single callback argument, which
-      // provides the LoadsSocket object as special property "socket'.
-      var testcb = function(err) {
-        if (err) {
-          var exc_info = ["JSError", JSON.stringify(err), ""];
-          socket.send('addFailure', {test: testname, exc_info: exc_info});
-        } else {
-          socket.send('addSuccess', {test: testname});
-        }
-        socket.send('stopTest', {test: testname});
-        process.nextTick(function() {
-          return cb(null);
-        });
-      };
-      socket.send('startTest', {test: testname});
-      testcb.socket = socket;
-      try {
-        test(testcb);
-      } catch (err) {
-        testcb(err);
-      }
-    }
-
-    function doRemainingTests(cb) {
-      if (curTest >= testsToRun.length) return cb(null);
-      doNextTest(function(err) {
-        if (err) return cb(err);
-        curTest++;
-        doRemainingTests(cb);
-      });
-    }
-
-    doRemainingTests(cb);
   }
 
   // Loop through doing runs of the tests until we've exceeded the
@@ -98,28 +54,58 @@ function run(tests, socket, cb) {
   var duration = socket.runStatus.duration || 0;
   var startTime = +new Date() / 1000;
 
-  function doTestRunsUntilFinished(cb) {
-    doTestRun(function(err) {
-      if (err) return cb(err);
-      var keepGoing = false;
-      if (socket.runStatus.currentHit < socket.runStatus.totalHits) {
-        keepGoing = true;
+  async.doWhilst(
+
+    // Loop body - do a single run through the tests.
+    function doTestRun(cb) {
+
+      // Iterate over the tests, doing each in turn.
+      async.eachSeries(testNames, function(testname, cb) {
+
+        // Each test expects to be called with a single callback argument,
+        // which provides the LoadsSocket object as special property "socket'.
+        var testcb = function(err) {
+          if (err) {
+            var exc_info = ["JSError", JSON.stringify(err), ""];
+            socket.send('addFailure', {test: testname, exc_info: exc_info});
+          } else {
+            socket.send('addSuccess', {test: testname});
+          }
+          socket.send('stopTest', {test: testname});
+          process.nextTick(function() {
+            return cb(null);
+          });
+        };
+        socket.send('startTest', {test: testname});
+        testcb.socket = socket;
+
+        // Do the test, being sure to catch any exceptions so that
+        // we can report them properly.
+        try {
+          testsToRun[testname](testcb);
+        } catch (err) {
+          testcb(err);
+        }
+      }, cb);
+
+    },
+
+    // Loop condition - stop once hits and duration have been met.
+    function checkForTermination() {
+      socket.runStatus.currentHit++;
+      if (socket.runStatus.currentHit <= socket.runStatus.totalHits) {
+        return true;
       }
       if (duration) {
         if (startTime + duration > (+new Date() / 1000)) {
-          keepGoing = true;
+          return true;
         }
       }
-      if (keepGoing) {
-        socket.runStatus.currentHit++;
-        doTestRunsUntilFinished(cb);
-      } else {
-        return cb(null);
-      }
-    });
-  }
+    },
 
-  doTestRunsUntilFinished(cb);
+    // Exit handler - just invoke the original callback.
+    cb
+  );
 }
 
 

@@ -9,7 +9,8 @@
   "repository": "http://github.com/mozilla-services/loads.js",
   "license": "MPL 2.0",
   "dependencies": {
-    "zmq": "2.4.x"
+    "zmq": "2.4.x",
+    "async": "0.2.9"
   },
   "devDependencies": {
     "jshint": "0.9.1"
