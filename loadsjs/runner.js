@@ -69,7 +69,7 @@ function run(tests, socket, cb) {
       async.eachSeries(testNames, function(testname, cb) {
 
         // Each test expects to be called with a single callback argument,
-        // which provides the LoadsSocket object as special property "socket'.
+        // which provides the LoadsSocket object as special property 'socket'.
         var testcb = function(err) {
           if (err) {
             var exc_info = ["JSError", JSON.stringify(err), ""];
