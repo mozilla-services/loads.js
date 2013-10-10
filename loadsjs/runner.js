@@ -11,7 +11,6 @@
 
 'use strict';
 
-var zmq = require('zmq');
 var async = require('async');
 var loads = require('./index.js');
 
@@ -35,7 +34,7 @@ function run(tests, socket, cb) {
   // If given a non-function object, run any test-like methods on it.
 
   var testNames = [];
-  var testsToRun = {}
+  var testsToRun = {};
 
   if (typeof tests === 'string') {
     tests = require(tests);
