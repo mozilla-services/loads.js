@@ -18,6 +18,13 @@ var loads = require('./index.js');
 exports = module.exports = run;
 
 
+//  Get the current time, in seconds.
+//
+function currentTime() {
+  return +new Date() / 1000;
+}
+
+
 //  Run tests from the given object, passing results to loads over the
 //  given socket.
 //
@@ -52,7 +59,7 @@ function run(tests, socket, cb) {
   // specified duration, or the specified number of hits.
 
   var duration = socket.runStatus.duration || 0;
-  var startTime = +new Date() / 1000;
+  var startTime = currentTime();
 
   async.doWhilst(
 
@@ -97,7 +104,7 @@ function run(tests, socket, cb) {
         return true;
       }
       if (duration) {
-        if (startTime + duration > (+new Date() / 1000)) {
+        if (startTime + duration > currentTime()) {
           return true;
         }
       }
